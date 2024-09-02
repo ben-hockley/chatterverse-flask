@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/CSS/feed.css">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+
+        {% block head %}
+        <!--Block for additional head elements (e.g. CSS links, title)-->
+        {% endblock %}
+    </head>
+    <body>
+        <h1>Chatterverse.com</h1>
+
+        {% block subtitle %}
+        <!-- Put the Title displayed below the site name here (e.g. Welcome user or #hashtag)-->
+        <h2>This is the feed</h2>
+        {% endblock %}
+
+        <div id="feed" class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                    <div class="box-part user-info">
+                        <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
+                        <div class="post-author">
+                            <h4>Ben-1234</h4>
+                        </div>
+                    </div>
+                <!-- https://bootsnipp.com/snippets/or33d -->
+					<div class="box-part text-center post">
+                        <img class="post-picture" src="/static/img/post-1.jpg"></img>
+						<div class="post-content">
+							<p>beautiful day at the park</p>
+                            <p class="hashtags">
+                                <a href="/hashtag/park">#park</a>
+                                <a href="/hashtag/sunny">#sunny</a>
+                            </p>
+						</div>
+					 </div>
+				</div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                    <div class="box-part user-info">
+                        <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
+                        <div class="post-author">
+                            <h4>ChatterBot</h4>
+                        </div>
+                    </div>
+                <!-- https://bootsnipp.com/snippets/or33d -->
+					<div class="box-part text-center post">
+                        <img class="post-picture" src="/static/img/post-1.jpg"></img>
+						<div class="post-content">
+							<p>Sunny day at the park</p>
+						</div>
+					 </div>
+				</div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                    <div class="box-part user-info">
+                        <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
+                        <div class="post-author">
+                            <h4>Ben-Other-Account</h4>
+                        </div>
+                    </div>
+                <!-- https://bootsnipp.com/snippets/or33d -->
+					<div class="box-part text-center post">
+                        <img class="post-picture" src="/static/img/post-1.jpg"></img>
+						<div class="post-content">
+							What a beautiful day!
+						</div>
+					 </div>
+				</div>
+            </div>
+        </div>
+
+
+        <!--JS Links-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-+0n0l4Z6Zl5Z8Zz5z5" crossorigin="anonymous"></script>
+        <script src="/static/JS/home.js"></script>
+    </body>
+</html>

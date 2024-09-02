@@ -1,0 +1,43 @@
+.container{
+    font-size: 15px;
+    background-color: darkgray;
+}
+.box{
+    padding: 10px 0px;
+    background-color: white;
+}
+/*  https://bootsnipp.com/snippets/or33d */
+.box-part{
+    padding:10px 10px;
+    margin:10px 0px;
+    border:1px solid black;
+}
+.post-content{
+    height: 100px;
+    overflow-y: auto;
+    margin: 5px auto;
+}
+.post-picture {
+    /* Must be a square image (width == height)*/
+    width:75%;
+    border-radius: 5%;
+}
+.post-content{
+    color:blue;
+}
+.user-info{
+    border:1px solid black;
+    color:black;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+.profile-picture{
+    width:20%;
+    border-radius: 20%;
+}
+.post-author{
+    width:60%;
+    margin: auto;
+    text-align: center;
+}
