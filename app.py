@@ -108,7 +108,13 @@ def renderProfile(username, profileName):
         posts = cur.fetchall()
 
         cur.execute(f'SELECT following FROM accounts WHERE username = "{username}"')
-        userFollowing = cur.fetchone()[0].split(',') #gets a list of all the users the current user is following
+        userFollowing = cur.fetchone()[0] #gets a list of all the users the current user is following
+
+        try:
+            userFollowing = userFollowing.split(',')
+        except:
+            userFollowing = []
+
 
         if profileName in userFollowing:
             isFollowing = True
