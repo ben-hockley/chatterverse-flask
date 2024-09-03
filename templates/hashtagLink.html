@@ -7,3 +7,36 @@
 {% block subtitle %}
 <h2>Posts with hashtag: {{hashtag}}</h2>
 {% endblock %}
+
+{% block feed %}
+<div class="row">
+    <!-- With help from : https://bobbyhadz.com/blog/iterate-dictionary-or-list-of-dictionaries-in-jinja-template#manually-accessing-the-keys-of-each-dictionary-in-the-jinja-template-->
+    <!-- + https://bootsnipp.com/snippets/or33d -->
+    {% for post in hashtagPosts %}
+    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
+        <div class="box-part user-info">
+            <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
+            <div class="post-author">
+                <h4>{{post['author']}}</h4>
+            </div>
+        </div>
+        <div class="box-part text-center post">
+            <img class="post-picture" src="{{post['img-url']}}"></img>
+            <div class="post-content">
+                <p>{{post['text']}}</p>
+                <p class="hashtags">
+                    {% for hashtag in post['hashtags'] %}
+                    <a href="/hashtag/{{hashtag}}">#{{hashtag}}</a>
+                    {% endfor %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="/static/JS/hashtagLink.js"></script>
+{% endblock %}

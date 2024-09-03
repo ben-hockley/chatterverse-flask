@@ -1,6 +1,10 @@
 from flask import Flask, render_template, redirect, request, url_for
 import sqlite3
+
+
 app = Flask(__name__)
+
+DATABASE = 'chatterverse.db'
 
 @app.route('/')
 def redirect_login():
@@ -22,12 +26,70 @@ def validate_login():
 @app.route('/home/<username>', methods=['GET', 'POST'])
 def render_home(username):
     if request.method == 'GET':
-        return render_template('home.html', username=username)
+
+        # sqlite 3
+        conn = sqlite3.connect(DATABASE)
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM posts')
+        posts = cur.fetchall()
+        conn.close()
+
+        postslist = []
+
+        for post in posts:
+
+            hashtagList = post[5].split(',')
+            newHashtagList = []
+
+            for hashtag in hashtagList:
+                newHashtagList.append(hashtag[1:])
+            
+
+            postdict = {
+                'id': post[0],
+                'date': post[1],
+                'author': post[2],
+                'img-url': post[3],
+                'text': post[4],
+                'hashtags': newHashtagList
+            }
+            postslist.append(postdict)
+        
+        return render_template('home.html', username=username, posts=postslist)
     
-@app.route('/hashtag/<hashtag>', methods=['GET', 'POST'])
-def render_hashtag_feed(hashtag):
+@app.route('/hashtag/<searchedHashtag>', methods=['GET', 'POST'])
+def render_hashtag_feed(searchedHashtag):
     if request.method == 'GET':
-        return render_template('hashtagLink.html', hashtag=hashtag)
+
+        # sqlite 3
+        conn = sqlite3.connect(DATABASE)
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM posts')
+        posts = cur.fetchall()
+        conn.close()
+
+        postswithHashtag = []
+
+        for post in posts:
+
+            hashtagList = post[5].split(',')
+            newHashtagList = []
+
+            for hashtag in hashtagList:
+                newHashtagList.append(hashtag[1:])
+            
+            # only pass dictionary if the post has the searched hashtag
+            if searchedHashtag in newHashtagList:
+                postdict = {
+                    'id': post[0],
+                    'date': post[1],
+                    'author': post[2],
+                    'img-url': post[3],
+                    'text': post[4],
+                    'hashtags': newHashtagList
+                }
+                postswithHashtag.append(postdict)
+        return render_template('hashtagLink.html', hashtag=searchedHashtag, hashtagPosts=postswithHashtag)
 
 if __name__ == '__main__':
     app.run()
