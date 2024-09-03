@@ -190,5 +190,36 @@ def unfollowUser(username, unfollowedUser):
     conn.close()
     return redirect(f'/home/{username}/profile/{unfollowedUser}')
 
+@app.route('/<username>/publishPost', methods=['POST'])
+def publishPost(username):
+    date = '2024-09-03'
+    author = username
+    imageurl = request.form.get('imageurl')
+    text = request.form.get('content')
+    hashtags = request.form.get('hashtags')
+
+    hashtags = hashtags.split(',')
+    if (len(hashtags) > 0):
+        for i in range(len(hashtags)):
+            if (hashtags[i][0] != '#'):
+                hashtags[i] = '#' + hashtags[i]
+    
+    hashtags = ",".join(hashtags)
+
+
+
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'INSERT INTO posts (date, author, imageurl, text, hashtags) VALUES ("{date}", "{author}", "{imageurl}", "{text}", "{hashtags}")')
+    conn.commit()
+    conn.close()
+
+    return redirect(f'/home/{username}')
+
+
+
+@app.route('/home/<username>/newPost')
+def createNewPost(username):
+    return render_template('newPost.html', username=username)
 if __name__ == '__main__':
     app.run()
