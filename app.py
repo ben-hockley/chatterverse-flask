@@ -1,7 +1,6 @@
 from flask import Flask, render_template, redirect, request, url_for
 import sqlite3
 
-
 app = Flask(__name__)
 
 DATABASE = 'chatterverse.db'
@@ -116,7 +115,6 @@ def renderProfile(username, profileName):
         else:
             isFollowing = False
 
-
         conn.close()
 
         profilePosts = []
@@ -191,5 +189,6 @@ def unfollowUser(username, unfollowedUser):
     conn.commit()
     conn.close()
     return redirect(f'/home/{username}/profile/{unfollowedUser}')
+
 if __name__ == '__main__':
     app.run()

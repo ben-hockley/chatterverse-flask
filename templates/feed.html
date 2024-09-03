@@ -16,7 +16,13 @@
     </head>
     <body>
         <h1>Chatterverse.com</h1>
-
+        <nav class="navbar navbar-expand-lg navbar-light bg-primary text-white">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/home/{{username}}">Home</a>
+                <a class="navbar-brand" href="/home/{{username}}/profile/{{username}}">Profile</a>
+                <a class="navbar-brand" href="/login">Logout</a>
+            </div>
+        </nav>
         {% block subtitle %}
         <!-- Put the Title displayed below the site name here (e.g. Welcome user or #hashtag)-->
          <!-- Put the user profile here when viewing a profile (above their posts)-->
