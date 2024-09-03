@@ -206,8 +206,6 @@ def publishPost(username):
     
     hashtags = ",".join(hashtags)
 
-
-
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
     cur.execute(f'INSERT INTO posts (date, author, imageurl, text, hashtags) VALUES ("{date}", "{author}", "{imageurl}", "{text}", "{hashtags}")')
@@ -216,6 +214,15 @@ def publishPost(username):
 
     return redirect(f'/home/{username}')
 
+
+@app.route('/<username>/deletePost/<postID>')
+def deletePost(username, postID):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'DELETE FROM posts WHERE id = {postID}')
+    conn.commit()
+    conn.close()
+    return redirect(f'/home/{username}/profile/{username}')
 
 
 @app.route('/home/<username>/newPost')

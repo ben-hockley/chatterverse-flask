@@ -41,6 +41,9 @@
                     <a href="/home/{{username}}/hashtag/{{hashtag}}">#{{hashtag}}</a>
                     {% endfor %}
                 </p>
+                {% if profileName == username %}
+                <a class="btn btn-danger" href="/{{username}}/deletePost/{{post['id']}}">Delete Post</a>
+                {% endif %}
             </div>
         </div>
     </div>
