@@ -107,6 +107,16 @@ def renderProfile(username, profileName):
         cur = conn.cursor()
         cur.execute(f'SELECT * FROM posts WHERE author = "{profileName}"')
         posts = cur.fetchall()
+
+        cur.execute(f'SELECT following FROM accounts WHERE username = "{username}"')
+        userFollowing = cur.fetchone()[0].split(',') #gets a list of all the users the current user is following
+
+        if profileName in userFollowing:
+            isFollowing = True
+        else:
+            isFollowing = False
+
+
         conn.close()
 
         profilePosts = []
@@ -128,7 +138,58 @@ def renderProfile(username, profileName):
                 'hashtags': newHashtagList
             }
             profilePosts.append(postdict)
-        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts)
+        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing)
 
+@app.route('/failure')
+def redirectToLogin():
+    return redirect('/login')
+
+@app.route('/home/<username>/followUser/<followedUser>')
+def followUser(username, followedUser):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT following FROM accounts WHERE username = "{username}"')
+    currentFollowing = cur.fetchone()[0]
+    cur.execute(f'SELECT followers FROM accounts WHERE username = "{followedUser}"')
+    currentFollowers = cur.fetchone()[0]
+
+    if currentFollowing == None:
+        currentFollowing = followedUser
+    else:
+        currentFollowing += ',' + followedUser
+    
+    if currentFollowers == None:
+        currentFollowers = username
+    else:
+        currentFollowers += ',' + username
+
+    cur.execute(f'UPDATE accounts SET following = "{currentFollowing}" WHERE username = "{username}"')
+    cur.execute(f'UPDATE accounts SET followers = "{currentFollowers}" WHERE username = "{followedUser}"')
+    conn.commit()
+    conn.close()
+    return redirect(f'/home/{username}/profile/{followedUser}')
+
+@app.route('/home/<username>/unfollowUser/<unfollowedUser>')
+def unfollowUser(username, unfollowedUser):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT following FROM accounts WHERE username = "{username}"')
+    currentFollowing = cur.fetchone()[0]
+    cur.execute(f'SELECT followers FROM accounts WHERE username = "{unfollowedUser}"')
+    currentFollowers = cur.fetchone()[0]
+
+    currentFollowing = currentFollowing.split(',')
+    currentFollowing.remove(unfollowedUser)
+    currentFollowing = ",".join(currentFollowing)
+    
+    currentFollowers = currentFollowers.split(',')
+    currentFollowers.remove(username)
+    currentFollowers = ",".join(currentFollowers)
+
+    cur.execute(f'UPDATE accounts SET following = "{currentFollowing}" WHERE username = "{username}"')
+    cur.execute(f'UPDATE accounts SET followers = "{currentFollowers}" WHERE username = "{unfollowedUser}"')
+    conn.commit()
+    conn.close()
+    return redirect(f'/home/{username}/profile/{unfollowedUser}')
 if __name__ == '__main__':
     app.run()
