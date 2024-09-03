@@ -17,7 +17,7 @@
         <div class="box-part user-info">
             <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
             <div class="post-author">
-                <h4>{{post['author']}}</h4>
+                <a href="/home/{{username}}/profile/{{post['author']}}"><h4>{{post['author']}}</h4></a>
             </div>
         </div>
         <div class="box-part text-center post">
@@ -26,7 +26,7 @@
                 <p>{{post['text']}}</p>
                 <p class="hashtags">
                     {% for hashtag in post['hashtags'] %}
-                    <a href="/hashtag/{{hashtag}}">#{{hashtag}}</a>
+                    <a href="/home/{{username}}/hashtag/{{hashtag}}">#{{hashtag}}</a>
                     {% endfor %}
                 </p>
             </div>

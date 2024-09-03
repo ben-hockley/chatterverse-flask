@@ -1,18 +1,25 @@
 {% extends "feed.html" %}
 
 {% block head %}
-<title>{{username}}'s Chatterverse</title>
+<title>{{profileName}}'s profile ({{username}})</title>
 {% endblock %}
 
 {% block subtitle %}
-<h2>Welcome back, {{username}}</h2>
+<div class="card" style="width: 28rem;">
+    <img class="card-img-top" src="/static/img/placeholder.jpeg" alt="Card image cap">
+    <div class="card-body">
+      <h5 class="card-title">{{profileName}}</h5>
+      <p class="card-text">This is {{profileName}}'s profile on the chatterverse.</p>
+      <a href="#" class="btn btn-primary">Go somewhere</a>
+    </div>
+  </div>
 {% endblock %}
 
 {% block feed %}
 <div class="row">
     <!-- With help from : https://bobbyhadz.com/blog/iterate-dictionary-or-list-of-dictionaries-in-jinja-template#manually-accessing-the-keys-of-each-dictionary-in-the-jinja-template-->
     <!-- + https://bootsnipp.com/snippets/or33d -->
-    {% for post in posts %}
+    {% for post in profilePosts %}
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
         <div class="box-part user-info">
             <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
@@ -35,8 +42,4 @@
     {% endfor %}
 </div>
 
-{% endblock %}
-
-{% block javascript %}
-<script src="/static/JS/home.js"></script>
 {% endblock %}
