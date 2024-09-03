@@ -18,7 +18,14 @@ def render_login():
 def validate_login():
     username = request.form.get("username")
     password = request.form.get("password")
-    if username == 'admin' and password == 'admin':
+
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT password FROM accounts WHERE username = "{username}"')
+    actualPassword = cur.fetchone()[0]
+    conn.close()
+
+    if password == actualPassword:
         return redirect(f'/home/{username}')
     else:
         return redirect('/failure')
