@@ -15,7 +15,9 @@
     <div class="card-body">
       <h5 class="card-title">{{profileName}}</h5>
       <p class="card-text">{{bio}}</p>
-
+      <a class="text-primary fw-bold text-decoration-none" href="/home/{{username}}/followers/{{profileName}}">{{numFollowers}} followers</a>
+      <a class="text-primary fw-bold text-decoration-none mx-3" href="/home/{{username}}/following/{{profileName}}">{{numFollowing}} following</a>
+      <br>
       {% if isFollowing %}
       <a href="/home/{{username}}/unfollowUser/{{profileName}}" class="btn btn-success">Following</a>
       {% elif profileName==username %}

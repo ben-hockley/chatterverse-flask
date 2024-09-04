@@ -144,6 +144,31 @@ def renderProfile(username, profileName):
         else:
             isFollowing = False
 
+
+
+        cur.execute(f'SELECT following FROM accounts WHERE username = "{profileName}"')
+        profileFollowing = cur.fetchone()[0]
+        cur.execute(f'SELECT followers FROM accounts WHERE username = "{profileName}"')
+        profileFollowers = cur.fetchone()[0]
+
+        try:
+            profileFollowing = profileFollowing.split(',')
+            if profileFollowing[0] == None or profileFollowing[0] =='':
+                profileFollowing = 0
+            else:
+                profileFollowing = len(profileFollowing)
+        except:
+            profileFollowing = 0
+
+        try:
+            profileFollowers = profileFollowers.split(',')
+            if profileFollowers[0] == None or profileFollowers[0] == '':
+                profileFollowers = 0
+            else:
+                profileFollowers = len(profileFollowers)
+        except:
+            profileFollowers = 0
+        
         conn.close()
 
         profilePosts = []
@@ -165,7 +190,7 @@ def renderProfile(username, profileName):
                 'hashtags': newHashtagList
             }
             profilePosts.append(postdict)
-        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture)
+        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=profileFollowers, numFollowing=profileFollowing)
 
 @app.route('/failure')
 def redirectToLogin():
