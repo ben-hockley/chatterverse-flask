@@ -15,7 +15,7 @@
     {% for post in hashtagPosts %}
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
         <div class="box-part user-info">
-            <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
+            <img class="profile-picture" src="{{post['authorProfilePicture']}}"></img>
             <div class="post-author">
                 <a href="/home/{{username}}/profile/{{post['author']}}"><h4>{{post['author']}}</h4></a>
             </div>

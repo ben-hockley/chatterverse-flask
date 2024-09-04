@@ -38,7 +38,6 @@ def render_home(username):
         cur = conn.cursor()
         cur.execute('SELECT * FROM posts')
         posts = cur.fetchall()
-        conn.close()
 
         postslist = []
 
@@ -50,6 +49,11 @@ def render_home(username):
             for hashtag in hashtagList:
                 newHashtagList.append(hashtag[1:])
             
+            cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
+            authorProfilePicture = cur.fetchone()[0]
+
+            if authorProfilePicture == None:
+                authorProfilePicture = "/static/img/placeholder.jpeg"
 
             postdict = {
                 'id': post[0],
@@ -57,10 +61,12 @@ def render_home(username):
                 'author': post[2],
                 'img-url': post[3],
                 'text': post[4],
-                'hashtags': newHashtagList
+                'hashtags': newHashtagList,
+                'authorProfilePicture': authorProfilePicture
             }
             postslist.append(postdict)
         
+        conn.close()
         return render_template('home.html', username=username, posts=postslist)
     
 @app.route('/home/<username>/hashtag/<searchedHashtag>', methods=['GET', 'POST'])
@@ -72,7 +78,6 @@ def render_hashtag_feed(username, searchedHashtag):
         cur = conn.cursor()
         cur.execute('SELECT * FROM posts')
         posts = cur.fetchall()
-        conn.close()
 
         postswithHashtag = []
 
@@ -83,18 +88,26 @@ def render_hashtag_feed(username, searchedHashtag):
 
             for hashtag in hashtagList:
                 newHashtagList.append(hashtag[1:])
-            
             # only pass dictionary if the post has the searched hashtag
             if searchedHashtag in newHashtagList:
+
+                cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
+                authorProfilePicture = cur.fetchone()[0]
+
+                if authorProfilePicture == None:
+                    authorProfilePicture = "/static/img/placeholder.jpeg"
+
                 postdict = {
                     'id': post[0],
                     'date': post[1],
                     'author': post[2],
                     'img-url': post[3],
                     'text': post[4],
-                    'hashtags': newHashtagList
+                    'hashtags': newHashtagList,
+                    'authorProfilePicture': authorProfilePicture
                 }
                 postswithHashtag.append(postdict)
+        conn.close()
         return render_template('hashtagLink.html', username=username, hashtag=searchedHashtag, hashtagPosts=postswithHashtag)
 
 @app.route('/home/<username>/profile/<profileName>', methods=['GET', 'POST'])
@@ -110,11 +123,21 @@ def renderProfile(username, profileName):
         cur.execute(f'SELECT following FROM accounts WHERE username = "{username}"')
         userFollowing = cur.fetchone()[0] #gets a list of all the users the current user is following
 
+        cur.execute(f'SELECT bio FROM accounts WHERE username = "{profileName}"')
+        bio = cur.fetchone()[0]
+        cur.execute(f'SELECT profilePicture FROM accounts WHERE username = "{profileName}"')
+        profilePicture = cur.fetchone()[0]
+
+        if (bio == None):
+            bio = f"Hi! I'm {profileName} and I'm new to Chatterverse!"
+
+        if (profilePicture == None):
+            profilePicture = "/static/img/placeholder.jpeg"
+
         try:
             userFollowing = userFollowing.split(',')
         except:
             userFollowing = []
-
 
         if profileName in userFollowing:
             isFollowing = True
@@ -142,7 +165,7 @@ def renderProfile(username, profileName):
                 'hashtags': newHashtagList
             }
             profilePosts.append(postdict)
-        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing)
+        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture)
 
 @app.route('/failure')
 def redirectToLogin():
@@ -234,5 +257,39 @@ def deletePost(username, postID):
 @app.route('/home/<username>/newPost')
 def createNewPost(username):
     return render_template('newPost.html', username=username)
+
+@app.route('/home/<username>/editBio')
+def editBio(username):
+    conn=sqlite3.connect(DATABASE)
+    cur=conn.cursor()
+    cur.execute(f'SELECT bio FROM accounts WHERE username = "{username}"')
+    currentBio = cur.fetchone()[0]
+    conn.close()
+    return render_template('editBio.html', username=username, bio=currentBio)
+
+@app.route('/<username>/publishNewBio', methods=['POST'])
+def publishNewBio(username):
+    newBio = request.form.get('newbio')
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'UPDATE accounts SET bio = "{newBio}" WHERE username = "{username}"')
+    conn.commit()
+    conn.close()
+    return redirect(f'/home/{username}/profile/{username}')
+
+@app.route('/home/<username>/editProfilePicture')
+def editProfilePicture(username):
+    return render_template('editProfilePicture.html', username=username)
+
+@app.route('/<username>/publishNewProfilePicture', methods=['POST'])
+def publishNewProfilePicture(username):
+    newProfilePicture = request.form.get('imageurl')
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'UPDATE accounts SET profilePicture = "{newProfilePicture}" WHERE username = "{username}"')
+    conn.commit()
+    conn.close()
+    return redirect(f'/home/{username}/profile/{username}')
+
 if __name__ == '__main__':
     app.run()

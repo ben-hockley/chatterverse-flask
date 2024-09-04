@@ -2,17 +2,24 @@
 
 {% block head %}
 <title>{{profileName}}'s profile ({{username}})</title>
+<link rel="stylesheet" href="/static/CSS/profile.css">
 {% endblock %}
 
 {% block subtitle %}
 <div class="card" style="width: 28rem;">
-    <img class="card-img-top" src="/static/img/placeholder.jpeg" alt="Card image cap">
+
+    {% if profileName == username %}
+    <a class="btn btn-success" id="newProfilePic" href="/home/{{username}}/editProfilePicture">+</a>
+    {% endif %}
+    <img class="card-img-top" src="{{profilePicture}}" alt="Card image cap">
     <div class="card-body">
       <h5 class="card-title">{{profileName}}</h5>
-      <p class="card-text">This is {{profileName}}'s profile on the chatterverse.</p>
+      <p class="card-text">{{bio}}</p>
 
       {% if isFollowing %}
       <a href="/home/{{username}}/unfollowUser/{{profileName}}" class="btn btn-success">Following</a>
+      {% elif profileName==username %}
+      <a href="/home/{{username}}/editBio" class="btn btn-primary">Edit Bio</a>
       {% else %}
       <a href="/home/{{username}}/followUser/{{profileName}}" class="btn btn-primary">Follow +</a>
       {% endif %}
@@ -27,7 +34,7 @@
     {% for post in profilePosts %}
     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
         <div class="box-part user-info">
-            <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
+            <img class="profile-picture" src="{{profilePicture}}"></img>
             <div class="post-author">
                 <a href="/home/{{username}}/profile/{{post['author']}}"><h4>{{post['author']}}</h4></a>
             </div>

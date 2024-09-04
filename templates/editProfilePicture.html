@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>New Post ({{username}})</title>
+        <title>Edit Profile Picture ({{username}})</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -9,22 +9,14 @@
         <link rel="stylesheet" href="/static/CSS/newPost.css">
     </head>
     <body>
-        <form action="/{{username}}/publishPost" method="post">
+        <form action="/{{username}}/publishNewProfilePicture" method="post">
             <div class="container">
-                <h1>New Post</h1>
+                <h1>New Profile Picture</h1>
                 <img src="" alt="Image Preview" id="imagePreview">
                 <div class="mb-3">
                     <label for="imageurl" class="form-label">Image URL</label>
                     <input type="text" class="form-control" id="imageurl" name="imageurl" required>
                     <button class="btn btn-info" onclick="previewImage()">Preview</button>
-                </div>
-                <div class="mb-3">
-                    <label for="content" class="form-label">Content</label>
-                    <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
-                </div>
-                <div class="mb-3">
-                    <label for="hashtags" class="form-label">Hashtags</label>
-                    <input type="text" class="form-control" id="hashtags" name="hashtags">
                 </div>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </div>
