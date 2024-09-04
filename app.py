@@ -153,21 +153,21 @@ def renderProfile(username, profileName):
 
         try:
             profileFollowing = profileFollowing.split(',')
-            if profileFollowing[0] == None or profileFollowing[0] =='':
-                profileFollowing = 0
-            else:
-                profileFollowing = len(profileFollowing)
+            numFollowing = 0
+            for acc in profileFollowing:
+                if acc != '':
+                    numFollowing += 1
         except:
-            profileFollowing = 0
+            numFollowing = 0
 
         try:
             profileFollowers = profileFollowers.split(',')
-            if profileFollowers[0] == None or profileFollowers[0] == '':
-                profileFollowers = 0
-            else:
-                profileFollowers = len(profileFollowers)
+            numFollowers = 0
+            for acc in profileFollowers:
+                if acc != '':
+                    numFollowers += 1
         except:
-            profileFollowers = 0
+            numFollowers = 0
         
         conn.close()
 
@@ -190,7 +190,7 @@ def renderProfile(username, profileName):
                 'hashtags': newHashtagList
             }
             profilePosts.append(postdict)
-        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=profileFollowers, numFollowing=profileFollowing)
+        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=numFollowers, numFollowing=numFollowing)
 
 @app.route('/failure')
 def redirectToLogin():
@@ -315,6 +315,32 @@ def publishNewProfilePicture(username):
     conn.commit()
     conn.close()
     return redirect(f'/home/{username}/profile/{username}')
+
+@app.route('/home/<username>/followers/<profile>')
+def displayFollowers(username, profile):
+    conn=sqlite3.connect(DATABASE)
+    cur=conn.cursor()
+    cur.execute(f'SELECT followers FROM accounts WHERE username = "{profile}"')
+    followers = cur.fetchone()[0]
+    conn.close()
+    followers = followers.split(',')
+    for follower in followers:
+        if follower == '':
+            followers.remove(follower)
+    return render_template('userlist.html', username=username, profile=profile, title='Followers', users=followers)
+
+@app.route('/home/<username>/following/<profile>')
+def displayFollowing(username, profile):
+    conn=sqlite3.connect(DATABASE)
+    cur=conn.cursor()
+    cur.execute(f'SELECT following FROM accounts WHERE username = "{profile}"')
+    following = cur.fetchone()[0]
+    conn.close()
+    following = following.split(',')
+    for account in following:
+        if account == '':
+            following.remove(account)
+    return render_template('userlist.html', username=username, profile=profile, title='Following', users=following)
 
 if __name__ == '__main__':
     app.run()
