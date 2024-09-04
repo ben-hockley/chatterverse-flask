@@ -19,7 +19,7 @@
       <a class="text-primary fw-bold text-decoration-none mx-3" href="/home/{{username}}/following/{{profileName}}">{{numFollowing}} following</a>
       <br>
       {% if isFollowing %}
-      <a href="/home/{{username}}/unfollowUser/{{profileName}}" class="btn btn-success">Following</a>
+      <a href="/home/{{username}}/unfollowUser/{{profileName}}" class="btn btn-success following">Following</a>
       {% elif profileName==username %}
       <a href="/home/{{username}}/editBio" class="btn btn-primary">Edit Bio</a>
       {% else %}

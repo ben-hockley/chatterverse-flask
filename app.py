@@ -342,5 +342,23 @@ def displayFollowing(username, profile):
             following.remove(account)
     return render_template('userlist.html', username=username, profile=profile, title='Following', users=following)
 
+@app.route('/createAccount')
+def createAccount():
+    return render_template('createAccount.html')
+
+@app.route('/submitNewAccount', methods=['POST'])
+def submitNewAccount():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    profilePicture= request.form.get('imageurl')
+    bio = request.form.get('bio')
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'INSERT INTO accounts (username, password, profilePicture, bio) VALUES ("{username}", "{password}", "{profilePicture}", "{bio}")')
+    conn.commit()
+    conn.close()
+    return redirect(f'/home/{username}')
+
+
 if __name__ == '__main__':
     app.run()
