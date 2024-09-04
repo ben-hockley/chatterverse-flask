@@ -20,14 +20,19 @@ def validate_login():
 
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
-    cur.execute(f'SELECT password FROM accounts WHERE username = "{username}"')
-    actualPassword = cur.fetchone()[0]
+    try:
+        cur.execute(f'SELECT password FROM accounts WHERE username = "{username}"')
+        actualPassword = cur.fetchone()[0]
+    except:
+        conn.close()
+        return redirect('/login')
+    
     conn.close()
 
     if password == actualPassword:
         return redirect(f'/home/{username}')
     else:
-        return redirect('/failure')
+        return redirect('/login')
     
 @app.route('/home/<username>', methods=['GET', 'POST'])
 def render_home(username):
@@ -323,7 +328,11 @@ def displayFollowers(username, profile):
     cur.execute(f'SELECT followers FROM accounts WHERE username = "{profile}"')
     followers = cur.fetchone()[0]
     conn.close()
-    followers = followers.split(',')
+
+    if followers == None:
+        followers = []
+    else:
+        followers = followers.split(',')
     for follower in followers:
         if follower == '':
             followers.remove(follower)
@@ -336,7 +345,10 @@ def displayFollowing(username, profile):
     cur.execute(f'SELECT following FROM accounts WHERE username = "{profile}"')
     following = cur.fetchone()[0]
     conn.close()
-    following = following.split(',')
+    if following == None:
+        following = []
+    else:
+        following = following.split(',')
     for account in following:
         if account == '':
             following.remove(account)
