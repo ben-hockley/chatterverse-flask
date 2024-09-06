@@ -46,3 +46,21 @@
     justify-content: space-evenly;
     flex-wrap: wrap;
 }
+.profileLink{
+    position:fixed;
+    top:10px;
+    right:10px;
+    height:100px;
+    border-radius: 50%;
+    box-sizing: border-box;
+    outline: 3px solid blue;
+}
+
+.navbarContainer a{
+    width:25%;
+    height:100%;
+    text-align: center;
+}
+.navbarContainer a:hover{
+    background-color: gray;
+}
