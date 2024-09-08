@@ -64,3 +64,13 @@
 .navbarContainer a:hover{
     background-color: gray;
 }
+
+.postActions{
+    width:100%;
+    display: flex;
+}
+.postActions a{
+    width:100%;
+    text-align: center;
+    height:100%;
+}

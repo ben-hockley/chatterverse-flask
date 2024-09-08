@@ -4,6 +4,9 @@
 <title>{{username}}'s Chatterverse</title>
 {% endblock %}
 
+{% block subtitle %}
+<h2>{{subtitle}}</h2>
+{% endblock %}
 {% block feed %}
 <a href="/home/{{username}}/profile/{{username}}">
     <img class="profileLink" src="{{userProfilePicture}}">
@@ -28,6 +31,14 @@
                     <a href="/home/{{username}}/hashtag/{{hashtag}}">#{{hashtag}}</a>
                     {% endfor %}
                 </p>
+            </div>
+            <div class="postActions">
+                {% if username in post['likes'] %}
+                <a class="btn btn-success like" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-solid fa-heart"></i></a>
+                {% else %}
+                <a class="btn btn-primary unlike" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-regular fa-heart"></i></a>
+                {% endif %}
+                <a class="btn btn-primary" href="/{{page}}/{{username}}/comment/{{post['id']}}">Comment <i class="fa-regular fa-comment"></i></a>
             </div>
         </div>
     </div>

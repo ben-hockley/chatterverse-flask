@@ -32,11 +32,11 @@ def validate_login():
     conn.close()
 
     if password == actualPassword:
-        return redirect(f'/home/{username}')
+        return redirect(f'/home/{username}/explore')
     else:
         return redirect('/login')
     
-@app.route('/home/<username>', methods=['GET', 'POST'])
+@app.route('/home/<username>/explore', methods=['GET', 'POST'])
 def render_home(username):
     if request.method == 'GET':
 
@@ -64,6 +64,11 @@ def render_home(username):
 
             for hashtag in hashtagList:
                 newHashtagList.append(hashtag[1:])
+
+            postLikes = post[6].split(',')
+            for liker in postLikes:
+                if liker == '':
+                    postLikes.remove(liker)
             
             cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
             authorProfilePicture = cur.fetchone()[0]
@@ -84,13 +89,13 @@ def render_home(username):
                 'img-url': post[3],
                 'text': post[4],
                 'hashtags': newHashtagList,
+                'likes': postLikes,
                 'authorProfilePicture': authorProfilePicture
             }
             postslist.append(postdict)
         
-        random.shuffle(postslist)
         conn.close()
-        return render_template('home.html', username=username, posts=postslist, userProfilePicture=userProfilePicture)
+        return render_template('home.html', username=username, posts=postslist, userProfilePicture=userProfilePicture, subtitle='', page='explore')
     
 @app.route('/home/<username>/hashtag/<searchedHashtag>', methods=['GET', 'POST'])
 def render_hashtag_feed(username, searchedHashtag):
@@ -126,6 +131,11 @@ def render_hashtag_feed(username, searchedHashtag):
                 cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
                 authorProfilePicture = cur.fetchone()[0]
 
+                postLikes = post[6].split(',')
+                for liker in postLikes:
+                    if liker == '':
+                        postLikes.remove(liker)
+
                 if authorProfilePicture == None:
                     authorProfilePicture = "/static/img/placeholder.jpeg"
                 try:
@@ -141,11 +151,12 @@ def render_hashtag_feed(username, searchedHashtag):
                     'img-url': post[3],
                     'text': post[4],
                     'hashtags': newHashtagList,
+                    'likes': postLikes,
                     'authorProfilePicture': authorProfilePicture
                 }
                 postswithHashtag.append(postdict)
         conn.close()
-        return render_template('hashtagLink.html', username=username, hashtag=searchedHashtag, hashtagPosts=postswithHashtag, userProfilePicture=userProfilePicture)
+        return render_template('home.html', username=username, posts=postswithHashtag, userProfilePicture=userProfilePicture, subtitle=f'Posts with #{searchedHashtag}', page=f'hashtag,{searchedHashtag}')
 
 @app.route('/home/<username>/profile/<profileName>', methods=['GET', 'POST'])
 def renderProfile(username, profileName):
@@ -466,6 +477,12 @@ def render_followingPage(username):
             cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
             authorProfilePicture = cur.fetchone()[0]
 
+            postLikes = post[6].split(',')
+
+            for liker in postLikes:
+                if liker == '':
+                    postLikes.remove(liker)
+
             if authorProfilePicture == None:
                 authorProfilePicture = "/static/img/placeholder.jpeg"
             try:
@@ -482,12 +499,42 @@ def render_followingPage(username):
                 'img-url': post[3],
                 'text': post[4],
                 'hashtags': newHashtagList,
+                'likes': postLikes,
                 'authorProfilePicture': authorProfilePicture
             }
             postslist.append(postdict)
         
         conn.close()
-        return render_template('home.html', username=username, posts=postslist, userProfilePicture=userProfilePicture)
-    
+        return render_template('home.html', username=username, posts=postslist, userProfilePicture=userProfilePicture, subtitle='', page='followingPage')
+
+@app.route('/<page>/<username>/likePost/<postID>')
+def likePost(page, username, postID):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT likes FROM posts WHERE id = {postID}')
+    currentLikes = cur.fetchone()[0]
+    if currentLikes == None:
+        currentLikes = username
+    elif currentLikes == '':
+        currentLikes = username
+    elif currentLikes.find(username) != -1:
+        #remove like
+        currentLikes = currentLikes.split(',')
+        currentLikes.remove(username)
+        currentLikes = ",".join(currentLikes)
+    else:
+        currentLikes += f',{username}'
+    cur.execute(f'UPDATE posts SET likes = "{currentLikes}" WHERE id = {postID}')
+    conn.commit()
+    conn.close()
+    # object page is a list if the page is a hashtag page, otherwise it is a string
+
+    if page[:7] == 'hashtag':
+        page = page.split(',')
+        page = page[1]
+        return redirect(f'/home/{username}/hashtag/{page}')
+    else:
+        return redirect(f'/home/{username}/{page}')
+
 if __name__ == '__main__':
     app.run()
