@@ -11,7 +11,8 @@
     <body>
         <div class="currentComments">
 
-            <a href="{{backUrl}}" class="btn btn-primary backButton"><i class="fa-solid fa-square-caret-left"></i> Back</a>
+            <!--<a href="{{backUrl}}" class="btn btn-primary backButton"><i class="fa-solid fa-square-caret-left"></i> Back</a>-->
+            <a href="/home/{{username}}/explore#{{postID}}" class="btn btn-primary backButton"><i class="fa-solid fa-square-caret-left"></i> Back</a>
             <h1>Current Comments</h1>
             {% if comments|length == 0 %}
             <h3>No Comments Yet</h3>
@@ -21,11 +22,14 @@
                 <div class="card-body">
                     <h5 class="card-title">{{comment[0]}}</h5>
                     <p class="card-text">{{comment[1]}}</p>
+                    {% if comment[0] == username %}
+                    <a href="/{{page}}/{{username}}/{{postID}}/deleteComment/{{ comments.index(comment) }}"><i class="fa-solid fa-trash-can"></i></a>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
-        <form id="newComment" action="/{{username}}/newComment/{{postID}}" method="POST">
+        <form id="newComment" action="/{{page}}/{{username}}/newComment/{{postID}}" method="POST">
             <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="New Comment"></textarea>
             <button type="submit" class="newCommentButton btn-primary">Submit</button>
         </form>

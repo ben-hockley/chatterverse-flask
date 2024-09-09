@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, request, url_for
 import sqlite3
 import urllib
+import re #regex
 
 app = Flask(__name__)
 
@@ -65,6 +66,14 @@ def render_home(username):
                 newHashtagList.append(hashtag[1:])
 
             try:
+                postComments = post[7].split(',')
+                for commenter in postComments:
+                    if commenter == '':
+                        postComments.remove(commenter)
+            except:
+                postComments = post[7]
+            
+            try:
                 postLikes = post[6].split(',')
                 for liker in postLikes:
                     if liker == '':
@@ -92,6 +101,7 @@ def render_home(username):
                 'text': post[4],
                 'hashtags': newHashtagList,
                 'likes': postLikes,
+                'comments': postComments,
                 'authorProfilePicture': authorProfilePicture
             }
             postslist.append(postdict)
@@ -134,6 +144,15 @@ def render_hashtag_feed(username, searchedHashtag):
                 authorProfilePicture = cur.fetchone()[0]
 
                 try:
+                    postComments = post[7].split(',')
+                    for commenter in postComments:
+                        if commenter == '':
+                            postComments.remove(commenter)
+                except:
+                    postComments = post[7]
+            
+
+                try:
                     postLikes = post[6].split(',')
                     for liker in postLikes:
                         if liker == '':
@@ -157,6 +176,7 @@ def render_hashtag_feed(username, searchedHashtag):
                     'text': post[4],
                     'hashtags': newHashtagList,
                     'likes': postLikes,
+                    'comments': postComments,
                     'authorProfilePicture': authorProfilePicture
                 }
                 postswithHashtag.append(postdict)
@@ -253,6 +273,14 @@ def renderProfile(username, profileName):
                 newHashtagList.append(hashtag[1:])
 
             try:
+                postComments = post[7].split(',')
+                for commenter in postComments:
+                    if commenter == '':
+                        postComments.remove(commenter)
+            except:
+                postComments = post[7]
+            
+            try:
                 postLikes = post[6].split(',')
                 for liker in postLikes:
                     if liker == '':
@@ -267,6 +295,7 @@ def renderProfile(username, profileName):
                 'img-url': post[3],
                 'text': post[4],
                 'likes': postLikes,
+                'comments': postComments,
                 'hashtags': newHashtagList,
                 'authorProfilePicture': profilePicture
             }
@@ -430,18 +459,47 @@ def displayFollowing(username, profile):
             following.remove(account)
     return render_template('userlist.html', username=username, profile=profile, title='Following', users=following)
 
-@app.route('/createAccount')
-def createAccount():
-    return render_template('createAccount.html')
+@app.route('/createAccount/<error>')
+def createAccount(error):
+    if error == 'none':
+        return render_template('createAccount.html', error=None)
+    elif error == 'error1':
+        return render_template('createAccount.html', error='Username must be 5-20 characters long')
+    elif error == 'error2':
+        return render_template('createAccount.html', error='Username must only contain letters, numbers, dashes, and underscores')
+    elif error == 'error3':
+        return render_template('createAccount.html', error='Username already taken')
+    elif error == 'error4':
+        return render_template('createAccount.html', error='Password must be 5-20 characters long')
+    
+
+
 
 @app.route('/submitNewAccount', methods=['POST'])
 def submitNewAccount():
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
     username = request.form.get('username')
     password = request.form.get('password')
     profilePicture= request.form.get('imageurl')
     bio = request.form.get('bio')
-    conn = sqlite3.connect(DATABASE)
-    cur = conn.cursor()
+
+    if len(username) > 20 or len(username) < 5:
+        conn.close()
+        return redirect('/createAccount/error1')
+    if not re.match("^[A-Za-z0-9_-]*$", username):
+        conn.close()
+        return redirect('/createAccount/error2')
+    cur.execute(f'SELECT * FROM accounts WHERE username="{username}"')
+    if cur.fetchone() != None:
+        conn.close()
+        return redirect('/createAccount/error3')
+    if len(password) > 20 or len(password) < 5:
+        conn.close()
+        return redirect('/createAccount/error4')
+    if len(bio) > 255:
+        bio = bio[:255]
     cur.execute(f'INSERT INTO accounts (username, password, profilePicture, bio) VALUES ("{username}", "{password}", "{profilePicture}", "{bio}")')
     conn.commit()
     conn.close()
@@ -500,6 +558,14 @@ def render_followingPage(username):
             except:
                 postLikes = post[6]
 
+            try:
+                postComments = post[7].split(',')
+                for commenter in postComments:
+                    if commenter == '':
+                        postComments.remove(commenter)
+            except:
+                postComments = post[7]
+
             if authorProfilePicture == None:
                 authorProfilePicture = "/static/img/placeholder.jpeg"
             try:
@@ -517,6 +583,7 @@ def render_followingPage(username):
                 'text': post[4],
                 'hashtags': newHashtagList,
                 'likes': postLikes,
+                'comments': postComments,
                 'authorProfilePicture': authorProfilePicture
             }
             postslist.append(postdict)
@@ -584,8 +651,7 @@ def loadComments(page, username, postID):
 
     if page[:7] == 'hashtag':
         page = page.split(',')
-        page = page[1]
-        backUrl = f'/home/{username}/hashtag/{page}'
+        backUrl = f'/home/{username}/{page[0]}/{page[1]}'
     elif page[:7] == 'profile':
         page = page.split(',')
         page = page[1]
@@ -593,10 +659,11 @@ def loadComments(page, username, postID):
     else:
         backUrl = f'/home/{username}/{page}' + '#' + postID
     conn.close()
-    return render_template('comments.html', username=username, postID=postID, comments=comments, backUrl=backUrl)
+    print(backUrl)
+    return render_template('comments.html', username=username, postID=postID, comments=comments, backUrl=backUrl, page=page)
 
-@app.route('/<username>/newComment/<postID>', methods=['GET', 'POST'])
-def postNewComment(username, postID):
+@app.route('/<page>/<username>/newComment/<postID>', methods=['GET', 'POST'])
+def postNewComment(page, username, postID):
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
     cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
@@ -607,7 +674,6 @@ def postNewComment(username, postID):
         comment = comment.replace(',', ' ')
     if comment.find(':') != -1:
         comment = comment.replace(':', ' ')
-    
 
     if (comment != ''):
         newComments = f"{username}:{comment}"
@@ -615,6 +681,25 @@ def postNewComment(username, postID):
         cur.execute(f'UPDATE posts SET comments = "{currentComments}" WHERE id = {postID}')
         conn.commit()
     conn.close()
-    return redirect(f'/{username}/comments/{postID}')
+    return redirect(f'/{page}/{username}/comments/{postID}')
+
+@app.route('/<page>/<username>/<postID>/deleteComment/<commentIndex>')
+def deleteComment(page, username, postID, commentIndex):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
+    comments = cur.fetchone()[0]
+    comments = comments.split(',')
+
+    for comment in comments:
+        if comment == '':
+            comments.remove(comment)
+    comments.remove(comments[int(commentIndex)])
+    comments = ",".join(comments)
+    cur.execute(f'UPDATE posts SET comments = "{comments}" WHERE id = {postID}')
+    conn.commit()
+    conn.close()
+    return redirect(f'/{page}/{username}/comments/{postID}')
+
 if __name__ == '__main__':
     app.run()

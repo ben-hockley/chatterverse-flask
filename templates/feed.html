@@ -65,11 +65,11 @@
                         </div>
                         <div class="postActions">
                             {% if username in post['likes'] %}
-                            <a class="btn btn-success like" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-solid fa-heart"></i></a>
+                            <a class="btn btn-success" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}}  <i class="fa-solid fa-heart"></i></a>
                             {% else %}
-                            <a class="btn btn-primary unlike" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-regular fa-heart"></i></a>
+                            <a class="btn btn-primary" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}}    <i class="fa-regular fa-heart"></i></a>
                             {% endif %}
-                            <a class="btn btn-primary" href="/{{page}}/{{username}}/comments/{{post['id']}}">Comment <i class="fa-regular fa-comment"></i></a>
+                            <a class="btn btn-primary" href="/{{page}}/{{username}}/comments/{{post['id']}}">{{post['comments']|length}}    <i class="fa-regular fa-comment"></i></a>
                         </div>
                     </div>
                 </div>
