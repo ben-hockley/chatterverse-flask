@@ -1,7 +1,6 @@
 from flask import Flask, render_template, redirect, request, url_for
 import sqlite3
 import urllib
-import random
 
 app = Flask(__name__)
 
@@ -65,10 +64,13 @@ def render_home(username):
             for hashtag in hashtagList:
                 newHashtagList.append(hashtag[1:])
 
-            postLikes = post[6].split(',')
-            for liker in postLikes:
-                if liker == '':
-                    postLikes.remove(liker)
+            try:
+                postLikes = post[6].split(',')
+                for liker in postLikes:
+                    if liker == '':
+                        postLikes.remove(liker)
+            except:
+                postLikes = post[6]
             
             cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
             authorProfilePicture = cur.fetchone()[0]
@@ -131,10 +133,13 @@ def render_hashtag_feed(username, searchedHashtag):
                 cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
                 authorProfilePicture = cur.fetchone()[0]
 
-                postLikes = post[6].split(',')
-                for liker in postLikes:
-                    if liker == '':
-                        postLikes.remove(liker)
+                try:
+                    postLikes = post[6].split(',')
+                    for liker in postLikes:
+                        if liker == '':
+                            postLikes.remove(liker)
+                except:
+                    postLikes = post[6]
 
                 if authorProfilePicture == None:
                     authorProfilePicture = "/static/img/placeholder.jpeg"
@@ -246,6 +251,14 @@ def renderProfile(username, profileName):
 
             for hashtag in hashtagList:
                 newHashtagList.append(hashtag[1:])
+
+            try:
+                postLikes = post[6].split(',')
+                for liker in postLikes:
+                    if liker == '':
+                        postLikes.remove(liker)
+            except:
+                postLikes = post[6]
             
             postdict = {
                 'id': post[0],
@@ -253,10 +266,12 @@ def renderProfile(username, profileName):
                 'author': post[2],
                 'img-url': post[3],
                 'text': post[4],
-                'hashtags': newHashtagList
+                'likes': postLikes,
+                'hashtags': newHashtagList,
+                'authorProfilePicture': profilePicture
             }
             profilePosts.append(postdict)
-        return render_template('profile.html', username=username, profileName=profileName, profilePosts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=numFollowers, numFollowing=numFollowing, userProfilePicture=userProfilePicture)
+        return render_template('profile.html', username=username, profileName=profileName, posts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=numFollowers, numFollowing=numFollowing, userProfilePicture=userProfilePicture, page=f'profile,{profileName}')
 
 @app.route('/failure')
 def redirectToLogin():
@@ -477,11 +492,13 @@ def render_followingPage(username):
             cur.execute(f'SELECT profilePicture FROM accounts WHERE username="{post[2]}"')
             authorProfilePicture = cur.fetchone()[0]
 
-            postLikes = post[6].split(',')
-
-            for liker in postLikes:
-                if liker == '':
-                    postLikes.remove(liker)
+            try:
+                postLikes = post[6].split(',')
+                for liker in postLikes:
+                    if liker == '':
+                        postLikes.remove(liker)
+            except:
+                postLikes = post[6]
 
             if authorProfilePicture == None:
                 authorProfilePicture = "/static/img/placeholder.jpeg"
@@ -533,8 +550,56 @@ def likePost(page, username, postID):
         page = page.split(',')
         page = page[1]
         return redirect(f'/home/{username}/hashtag/{page}')
+    elif page[:7] == 'profile':
+        page = page.split(',')
+        page = page[1]
+        return redirect(f'/home/{username}/profile/{page}')
     else:
         return redirect(f'/home/{username}/{page}')
+    
 
+@app.route('/<username>/comments/<postID>')
+def loadComments(username, postID):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
+    comments = cur.fetchone()[0]
+    if comments[0] == ',':
+        comments = comments[1:]
+    try:
+        comments = comments.split(',')
+        newComments = []
+        for comment in comments:
+            if comment == '':
+                comments.remove(comment)
+            else:
+                newComments.append(comment.split(':'))
+        comments = newComments
+    except:
+        comments = []
+    conn.close()
+    return render_template('comments.html', username=username, postID=postID, comments=comments)
+
+@app.route('/<username>/newComment/<postID>', methods=['GET', 'POST'])
+def postNewComment(username, postID):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
+    currentComments = cur.fetchone()[0]
+    comment = request.form.get('comment')
+
+    if comment.find(',') != -1:
+        comment = comment.replace(',', ' ')
+    if comment.find(':') != -1:
+        comment = comment.replace(':', ' ')
+    
+
+    if (comment != ''):
+        newComments = f"{username}:{comment}"
+        currentComments += f",{newComments}"
+        cur.execute(f'UPDATE posts SET comments = "{currentComments}" WHERE id = {postID}')
+        conn.commit()
+    conn.close()
+    return redirect(f'/{username}/comments/{postID}')
 if __name__ == '__main__':
     app.run()

@@ -10,7 +10,7 @@
     {% if profileName == username %}
     <a class="btn btn-success" id="newProfilePic" href="/home/{{username}}/editProfilePicture">+</a>
     {% endif %}
-    <img class="card-img-top" src="{{profilePicture}}" alt="profile-picture">
+    <img class="card-img-top profilePicture" src="{{profilePicture}}" alt="profile-picture">
     <div class="card-body">
       <h5 class="card-title">{{profileName}}</h5>
       <p class="card-text">{{bio}}</p>
@@ -26,61 +26,11 @@
       <a href="/home/{{username}}/followUser/{{profileName}}" class="btn btn-primary">Follow +</a>
       {% endif %}
     </div>
-  </div>
-{% endblock %}
-
-{% block feed %}
-<a href="/home/{{username}}/profile/{{username}}">
-    <img class="profileLink" src="{{userProfilePicture}}">
-</a>
-<div class="row">
-    <!-- With help from : https://bobbyhadz.com/blog/iterate-dictionary-or-list-of-dictionaries-in-jinja-template#manually-accessing-the-keys-of-each-dictionary-in-the-jinja-template-->
-    <!-- + https://bootsnipp.com/snippets/or33d -->
-    {% if profilePosts|length == 0 %}
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
-        <div class="box-part text-center post">
-            <div class="post-content">
-                <p>No posts yet!</p>
-                {% if profileName == username %}
-                <a class="btn btn-primary" href="/home/{{username}}/newPost">New post</a>
-                {% endif %}
-            </div>
-        </div>
-    {% endif %}
-    {% for post in profilePosts %}
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
-        <div class="box-part user-info">
-            <img class="profile-picture" src="{{profilePicture}}"></img>
-            <div class="post-author">
-                <a href="/home/{{username}}/profile/{{post['author']}}"><h4>{{post['author']}}</h4></a>
-            </div>
-        </div>
-        <div class="box-part text-center post">
-            <img class="post-picture" src="{{post['img-url']}}"></img>
-            <div class="post-content">
-                <p>{{post['text']}}</p>
-                <p class="hashtags">
-                    {% for hashtag in post['hashtags'] %}
-                    <a href="/home/{{username}}/hashtag/{{hashtag}}">#{{hashtag}}</a>
-                    {% endfor %}
-                </p>
-                {% if profileName == username %}
-                <a class="btn btn-danger" href="/{{username}}/deletePost/{{post['id']}}">Delete Post</a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-    {% if profilePosts|length > 0 %}
-    {% if profileName == username %}
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
-        <div class="box-part text-center post">
-            <div class="post-content">
-                <a class="btn btn-success" href="/home/{{username}}/newPost">New post +</a>
-            </div>
-        </div>
-    {% endif %}
-    {% endif %}
 </div>
 
+{% if posts|length == 0 %}
+    <h2>{{profileName}} has no posts yet!</h2>
+{% else %}
+<h2>{{profileName}}'s Posts:</h2>
+{% endif %}
 {% endblock %}

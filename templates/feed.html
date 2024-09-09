@@ -26,29 +26,55 @@
         {% endblock %}
 
         <div id="feed" class="container">
-            {% block feed %}
-            <div class="row" id="row1">
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                    <div class="box-part user-info">
-                        <img class="profile-picture" src="/static/img/placeholder.jpeg"></img>
-                        <div class="post-author">
-                            <h4>Ben-1234</h4>
+            <a href="/home/{{username}}/profile/{{username}}">
+                <img class="profileLink" src="{{userProfilePicture}}">
+            </a>
+            <div class="row">
+
+                {% if page[:7] == "profile" %}
+                {% if profileName == username %}
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
+                    <div class="box-part text-center post">
+                        <div class="postActions">
+                            <a class="btn btn-primary" href="/home/{{username}}/newPost">New Post <i class="fa-solid fa-plus"></i></a>
                         </div>
                     </div>
-                <!-- https://bootsnipp.com/snippets/or33d -->
-					<div class="box-part text-center post">
-                        <img class="post-picture" src="/static/img/post-1.jpg"></img>
-						<div class="post-content">
-							<p>beautiful day at the park</p>
+                </div>
+                {% endif %}
+                {% endif %}
+
+                <!-- With help from : https://bobbyhadz.com/blog/iterate-dictionary-or-list-of-dictionaries-in-jinja-template#manually-accessing-the-keys-of-each-dictionary-in-the-jinja-template-->
+                <!-- + https://bootsnipp.com/snippets/or33d -->
+                {% for post in posts %}
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
+                    <div class="box-part user-info">
+                        <img class="profile-picture" src="{{post['authorProfilePicture']}}"></img>
+                        <div class="post-author">
+                            <a href="/home/{{username}}/profile/{{post['author']}}"><h4>{{post['author']}}</h4></a>
+                        </div>
+                    </div>
+                    <div class="box-part text-center post">
+                        <img class="post-picture" src="{{post['img-url']}}"></img>
+                        <div class="post-content">
+                            <p>{{post['text']}}</p>
                             <p class="hashtags">
-                                <a href="/hashtag/park">#park</a>
-                                <a href="/hashtag/sunny">#sunny</a>
+                                {% for hashtag in post['hashtags'] %}
+                                <a href="/home/{{username}}/hashtag/{{hashtag}}">#{{hashtag}}</a>
+                                {% endfor %}
                             </p>
-						</div>
-					 </div>
-				</div>
+                        </div>
+                        <div class="postActions">
+                            {% if username in post['likes'] %}
+                            <a class="btn btn-success like" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-solid fa-heart"></i></a>
+                            {% else %}
+                            <a class="btn btn-primary unlike" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-regular fa-heart"></i></a>
+                            {% endif %}
+                            <a class="btn btn-primary" href="/{{username}}/comments/{{post['id']}}">Comment <i class="fa-regular fa-comment"></i></a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            {% endblock %}
         </div>
 
 

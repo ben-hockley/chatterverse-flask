@@ -1,0 +1,41 @@
+body{
+    height:100vh;
+    width:100%;
+    box-sizing: border-box;
+    margin:0;
+    padding:0;
+    border:1px solid black;
+}
+.currentComments{
+    text-align: center;
+    height:80%;
+    overflow:auto;
+    box-sizing: border-box;
+    border:1px solid black;
+}
+.comment{
+    width:80%;
+    box-sizing: border-box;
+    border:1px solid black;
+    margin:auto;
+    text-align: start;
+}
+#newComment{
+    width:100%;
+    margin:auto;
+    height:20%;
+    display:flex;
+    justify-content: space-evenly;
+}
+#newComment textarea{
+    width:70%;
+    height:100%;
+    box-sizing: border-box;
+    border:1px solid black;
+}
+#newComment button{
+    width:20%;
+    height:100%;
+    box-sizing: border-box;
+    border:1px solid black;
+}

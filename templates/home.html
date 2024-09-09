@@ -7,45 +7,6 @@
 {% block subtitle %}
 <h2>{{subtitle}}</h2>
 {% endblock %}
-{% block feed %}
-<a href="/home/{{username}}/profile/{{username}}">
-    <img class="profileLink" src="{{userProfilePicture}}">
-</a>
-<div class="row">
-    <!-- With help from : https://bobbyhadz.com/blog/iterate-dictionary-or-list-of-dictionaries-in-jinja-template#manually-accessing-the-keys-of-each-dictionary-in-the-jinja-template-->
-    <!-- + https://bootsnipp.com/snippets/or33d -->
-    {% for post in posts %}
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 chatterverse-post">
-        <div class="box-part user-info">
-            <img class="profile-picture" src="{{post['authorProfilePicture']}}"></img>
-            <div class="post-author">
-                <a href="/home/{{username}}/profile/{{post['author']}}"><h4>{{post['author']}}</h4></a>
-            </div>
-        </div>
-        <div class="box-part text-center post">
-            <img class="post-picture" src="{{post['img-url']}}"></img>
-            <div class="post-content">
-                <p>{{post['text']}}</p>
-                <p class="hashtags">
-                    {% for hashtag in post['hashtags'] %}
-                    <a href="/home/{{username}}/hashtag/{{hashtag}}">#{{hashtag}}</a>
-                    {% endfor %}
-                </p>
-            </div>
-            <div class="postActions">
-                {% if username in post['likes'] %}
-                <a class="btn btn-success like" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-solid fa-heart"></i></a>
-                {% else %}
-                <a class="btn btn-primary unlike" href="/{{page}}/{{username}}/likePost/{{post['id']}}">{{post['likes']|length}} likes <i class="fa-regular fa-heart"></i></a>
-                {% endif %}
-                <a class="btn btn-primary" href="/{{page}}/{{username}}/comment/{{post['id']}}">Comment <i class="fa-regular fa-comment"></i></a>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-{% endblock %}
 
 {% block javascript %}
 <script src="/static/JS/home.js"></script>
