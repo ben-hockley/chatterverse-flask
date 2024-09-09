@@ -549,22 +549,26 @@ def likePost(page, username, postID):
     if page[:7] == 'hashtag':
         page = page.split(',')
         page = page[1]
-        return redirect(f'/home/{username}/hashtag/{page}')
+        return redirect(f'/home/{username}/hashtag/{page}' + '#' + postID)
     elif page[:7] == 'profile':
         page = page.split(',')
         page = page[1]
-        return redirect(f'/home/{username}/profile/{page}')
+        return redirect(f'/home/{username}/profile/{page}' + '#' + postID)
     else:
-        return redirect(f'/home/{username}/{page}')
+        return redirect(f'/home/{username}/{page}' + '#' + postID)
     
 
-@app.route('/<username>/comments/<postID>')
-def loadComments(username, postID):
+@app.route('/<page>/<username>/comments/<postID>')
+def loadComments(page, username, postID):
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
     cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
     comments = cur.fetchone()[0]
-    if comments[0] == ',':
+    if comments == None:
+        comments = ''
+    elif comments == '':
+        comments = ''
+    elif comments[0] == ',':
         comments = comments[1:]
     try:
         comments = comments.split(',')
@@ -577,8 +581,19 @@ def loadComments(username, postID):
         comments = newComments
     except:
         comments = []
+
+    if page[:7] == 'hashtag':
+        page = page.split(',')
+        page = page[1]
+        backUrl = f'/home/{username}/hashtag/{page}'
+    elif page[:7] == 'profile':
+        page = page.split(',')
+        page = page[1]
+        backUrl = f'/home/{username}/profile/{page}'
+    else:
+        backUrl = f'/home/{username}/{page}' + '#' + postID
     conn.close()
-    return render_template('comments.html', username=username, postID=postID, comments=comments)
+    return render_template('comments.html', username=username, postID=postID, comments=comments, backUrl=backUrl)
 
 @app.route('/<username>/newComment/<postID>', methods=['GET', 'POST'])
 def postNewComment(username, postID):
