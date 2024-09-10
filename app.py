@@ -181,7 +181,7 @@ def render_hashtag_feed(username, searchedHashtag):
                 }
                 postswithHashtag.append(postdict)
         conn.close()
-        return render_template('home.html', username=username, posts=postswithHashtag, userProfilePicture=userProfilePicture, subtitle=f'Posts with #{searchedHashtag}', page=f'hashtag,{searchedHashtag}')
+        return render_template('home.html', username=username, posts=postswithHashtag, userProfilePicture=userProfilePicture, subtitle=f'Posts with #{searchedHashtag}', page=f'hashtag/{searchedHashtag}')
 
 @app.route('/home/<username>/profile/<profileName>', methods=['GET', 'POST'])
 def renderProfile(username, profileName):
@@ -648,18 +648,48 @@ def loadComments(page, username, postID):
         comments = newComments
     except:
         comments = []
-
     if page[:7] == 'hashtag':
-        page = page.split(',')
-        backUrl = f'/home/{username}/{page[0]}/{page[1]}'
-    elif page[:7] == 'profile':
-        page = page.split(',')
-        page = page[1]
-        backUrl = f'/home/{username}/profile/{page}'
-    else:
-        backUrl = f'/home/{username}/{page}' + '#' + postID
+        print("hashtag true")
+        page = page.replace(',', '/')
+    backUrl = f'/home/{username}/{page}' + '#' + postID
     conn.close()
-    print(backUrl)
+    print("page: " + page)
+    print("backUrl: " + backUrl)
+    return render_template('comments.html', username=username, postID=postID, comments=comments, backUrl=backUrl, page=page)
+
+
+@app.route('/hashtag/<hashtagName>/<username>/comments/<postID>')
+def loadCommentsHashtag(hashtagName, username, postID):
+
+    page = f'hashtag/{hashtagName}'
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
+    comments = cur.fetchone()[0]
+    if comments == None:
+        comments = ''
+    elif comments == '':
+        comments = ''
+    elif comments[0] == ',':
+        comments = comments[1:]
+    try:
+        comments = comments.split(',')
+        newComments = []
+        for comment in comments:
+            if comment == '':
+                comments.remove(comment)
+            else:
+                newComments.append(comment.split(':'))
+        comments = newComments
+    except:
+        comments = []
+    if page[:7] == 'hashtag':
+        print("hashtag true")
+        page = page.replace(',', '/')
+    backUrl = f'/home/{username}/{page}' + '#' + postID
+    conn.close()
+    print("page: " + page)
+    print("backUrl: " + backUrl)
     return render_template('comments.html', username=username, postID=postID, comments=comments, backUrl=backUrl, page=page)
 
 @app.route('/<page>/<username>/newComment/<postID>', methods=['GET', 'POST'])
@@ -683,8 +713,53 @@ def postNewComment(page, username, postID):
     conn.close()
     return redirect(f'/{page}/{username}/comments/{postID}')
 
+@app.route('/hashtag/<hashtagName>/<username>/newComment/<postID>', methods=['GET', 'POST'])
+def postNewCommentHashtag(hashtagName, username, postID):
+
+    page = f'hashtag/{hashtagName}'
+    
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
+    currentComments = cur.fetchone()[0]
+    comment = request.form.get('comment')
+
+    if comment.find(',') != -1:
+        comment = comment.replace(',', ' ')
+    if comment.find(':') != -1:
+        comment = comment.replace(':', ' ')
+
+    if (comment != ''):
+        newComments = f"{username}:{comment}"
+        currentComments += f",{newComments}"
+        cur.execute(f'UPDATE posts SET comments = "{currentComments}" WHERE id = {postID}')
+        conn.commit()
+    conn.close()
+    return redirect(f'/{page}/{username}/comments/{postID}')
+
 @app.route('/<page>/<username>/<postID>/deleteComment/<commentIndex>')
 def deleteComment(page, username, postID, commentIndex):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')
+    comments = cur.fetchone()[0]
+    comments = comments.split(',')
+
+    for comment in comments:
+        if comment == '':
+            comments.remove(comment)
+    comments.remove(comments[int(commentIndex)])
+    comments = ",".join(comments)
+    cur.execute(f'UPDATE posts SET comments = "{comments}" WHERE id = {postID}')
+    conn.commit()
+    conn.close()
+    return redirect(f'/{page}/{username}/comments/{postID}')
+
+@app.route('/hashtag/<hashtagName>/<username>/<postID>/deleteComment/<commentIndex>')
+def deleteCommentHashtag(hashtagName, username, postID, commentIndex):
+
+    page = f'hashtag/{hashtagName}'
+
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
     cur.execute(f'SELECT comments FROM posts WHERE id = {postID}')

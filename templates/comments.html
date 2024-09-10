@@ -10,9 +10,7 @@
     </head>
     <body>
         <div class="currentComments">
-
-            <!--<a href="{{backUrl}}" class="btn btn-primary backButton"><i class="fa-solid fa-square-caret-left"></i> Back</a>-->
-            <a href="/home/{{username}}/explore#{{postID}}" class="btn btn-primary backButton"><i class="fa-solid fa-square-caret-left"></i> Back</a>
+            <a class="btn btn-primary backButton" href="{{backUrl}}"><i class="fa-solid fa-square-caret-left"></i> Back</a>
             <h1>Current Comments</h1>
             {% if comments|length == 0 %}
             <h3>No Comments Yet</h3>

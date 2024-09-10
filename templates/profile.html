@@ -29,8 +29,16 @@
 </div>
 
 {% if posts|length == 0 %}
-    <h2>{{profileName}} has no posts yet!</h2>
+  {% if profileName == username %}
+  <h2>You have no posts yet!</h2>
+  {% else %}
+  <h2>{{profileName}} has no posts yet!</h2>
+  {% endif %}
 {% else %}
-<h2>{{profileName}}'s Posts:</h2>
+  {% if profileName == username %}
+  <h2>Your Posts:</h2>
+  {% else %}
+  <h2>{{profileName}}'s Posts:</h2>
+  {% endif %}
 {% endif %}
 {% endblock %}
