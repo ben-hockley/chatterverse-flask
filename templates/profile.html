@@ -43,3 +43,22 @@
 {% endif %}
 
 {% endblock %}
+
+{% block footer %}
+
+<h2>People you may know</h2>
+<div class="scrollmenu" id="quickAdd">
+  {% for account in accounts %}
+  <div class="newUser"> <!-- account[1] is the recommended account's username -->
+      <a href='/home/{{username}}/profile/{{account[1]}}'><img class="profilePicture" src="{{account[5]}}" alt="No profile picture"></a>
+      <a href='/home/{{username}}/profile/{{account[1]}}'><h5 class="card-title">{{account[1]}}</h5></a>
+      <p class="card-text">{{account[6]}}</p>
+      <a href="/{{username}}/quickAdd/{{profileName}}/{{account[1]}}" class="btn btn-primary followButton">Follow</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="/static/JS/profile.js"></script>
+{% endblock %}

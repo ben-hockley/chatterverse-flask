@@ -1,5 +1,5 @@
-from flask import Flask, render_template, redirect, request, url_for
-import sqlite3
+from flask import Flask, render_template, redirect, request
+import sqlite3 #sqlite3 database
 import urllib
 import re #regex
 
@@ -234,12 +234,18 @@ def renderProfile(username, profileName):
         except:
             userFollowing = []
 
+        #remove accounts from the quick add bar that are already followed, the user's own account, and the profile being viewed's account
+        for account in accounts:
+            if account[1] == profileName or account[1] == username:
+                accounts.remove(account)
+            elif account[1] in userFollowing:
+                accounts.remove(account)
+        
+        #check if the user is following the profile being viewed
         if profileName in userFollowing:
             isFollowing = True
         else:
             isFollowing = False
-
-
 
         cur.execute(f'SELECT following FROM accounts WHERE username = "{profileName}"')
         profileFollowing = cur.fetchone()[0]
@@ -308,7 +314,7 @@ def renderProfile(username, profileName):
         except:
             print("Error loading profile's posts")
             profilePosts = []
-        return render_template('profile.html', username=username, profileName=profileName, posts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=numFollowers, numFollowing=numFollowing, userProfilePicture=userProfilePicture, page=f'profile/{profileName}')
+        return render_template('profile.html', username=username, profileName=profileName, posts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=numFollowers, numFollowing=numFollowing, userProfilePicture=userProfilePicture, page=f'profile/{profileName}', accounts=accounts)
 
 @app.route('/failure')
 def redirectToLogin():
@@ -427,6 +433,13 @@ def editProfilePicture(username):
 @app.route('/<username>/publishNewProfilePicture', methods=['POST'])
 def publishNewProfilePicture(username):
     newProfilePicture = request.form.get('imageurl')
+
+    # if profile picture doesn't exist, replace with placeholder
+    try:
+        f = urllib.urlopen(urllib.Request(newProfilePicture))
+        f.close()
+    except:
+        userProfilePicture = "/static/img/placeholder.jpeg"
     conn = sqlite3.connect(DATABASE)
     cur = conn.cursor()
     cur.execute(f'UPDATE accounts SET profilePicture = "{newProfilePicture}" WHERE username = "{username}"')
@@ -508,6 +521,14 @@ def submitNewAccount():
         return redirect('/createAccount/error4')
     if len(bio) > 255:
         bio = bio[:255]
+
+    #replace profile picture with placeholder if image does not exist
+    try:
+        f = urllib.urlopen(urllib.Request(profilePicture))
+        f.close()
+    except:
+        profilePicture = "/static/img/placeholder.jpeg"
+    
     cur.execute(f'INSERT INTO accounts (username, password, profilePicture, bio) VALUES ("{username}", "{password}", "{profilePicture}", "{bio}")')
     conn.commit()
     conn.close()
@@ -910,5 +931,32 @@ def deleteCommentProfile(profileName, username, postID, commentIndex):
     conn.commit()
     conn.close()
     return redirect(f'/{page}/{username}/comments/{postID}')
+
+@app.route('/<username>/quickAdd/<profileViewing>/<accountAdded>')
+def quickAdd(username, accountAdded, profileViewing):
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+
+    cur.execute(f'SELECT following FROM accounts WHERE username = "{username}"')
+    currentFollowing = cur.fetchone()[0]
+    if currentFollowing == None:
+        currentFollowing = accountAdded
+    elif accountAdded not in currentFollowing.split(','):
+        currentFollowing += f',{accountAdded}'
+
+    cur.execute(f'SELECT followers FROM accounts WHERE username = "{accountAdded}"')
+    currentFollowers = cur.fetchone()[0]
+    if currentFollowers == None:
+        currentFollowers = username
+    elif username not in currentFollowers.split(','):
+        currentFollowers += f',{username}'
+
+    cur.execute(f'UPDATE accounts SET following = "{currentFollowing}" WHERE username = "{username}"')
+    cur.execute(f'UPDATE accounts SET followers = "{currentFollowers}" WHERE username = "{accountAdded}"')
+    conn.commit()
+    conn.close()
+    #return back to the profile the user was originally viewing
+    return redirect(f'/home/{username}/profile/{profileViewing}#quickAdd')
+
 if __name__ == '__main__':
     app.run()

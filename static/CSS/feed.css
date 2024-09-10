@@ -46,17 +46,19 @@
     justify-content: space-evenly;
     flex-wrap: wrap;
 }
-.rowUsers {
-    overflow-x: auto;
+.scrollmenu {
+    overflow: auto;
     white-space: nowrap;
-    display:flex;
 }
-.rowUsers > .col-xs-4{
-    float:none;
-    font-size: 48px;
-    padding-bottom: 20px;
-    padding-top: 18px;
+.scrollmenu div {
+    display: inline-block;
+    color: black;
     text-align: center;
+    text-decoration: none;
+    margin:10px;
+    width: 25%;
+    border: 1px solid black;
+    border-radius: 5%;
 }
 .profileLink{
     position:fixed;
@@ -67,11 +69,12 @@
     box-sizing: border-box;
     outline: 3px solid blue;
 }
-.horizontalScrollable{
-    overflow-x: auto;
-    white-space: nowrap;
-    display:flex;
+.newUser img{
+    width:50%;
+    margin:5px auto;
+    border-radius:5%;
 }
+
 
 .navbarContainer a{
     width:25%;
