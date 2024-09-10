@@ -130,6 +130,7 @@ def render_hashtag_feed(username, searchedHashtag):
 
         postswithHashtag = []
 
+        
         for post in posts:
 
             hashtagList = post[5].split(',')
@@ -137,6 +138,7 @@ def render_hashtag_feed(username, searchedHashtag):
 
             for hashtag in hashtagList:
                 newHashtagList.append(hashtag[1:])
+
             # only pass dictionary if the post has the searched hashtag
             if searchedHashtag in newHashtagList:
 
@@ -192,6 +194,8 @@ def renderProfile(username, profileName):
         cur = conn.cursor()
         cur.execute(f'SELECT * FROM posts WHERE author = "{profileName}"')
         posts = cur.fetchall()
+        cur.execute(f'SELECT * FROM accounts')
+        accounts = cur.fetchall()
 
         cur.execute(f'SELECT following FROM accounts WHERE username = "{username}"')
         userFollowing = cur.fetchone()[0] #gets a list of all the users the current user is following
@@ -220,7 +224,7 @@ def renderProfile(username, profileName):
             profilePicture = "/static/img/placeholder.jpeg"
 
         try:
-            f = urllib.urlopen(urllib.Request(userProfilePicture))
+            f = urllib.urlFpropen(urllib.Request(userProfilePicture))
             f.close()
         except:
             userProfilePicture = "/static/img/placeholder.jpeg"
@@ -264,42 +268,46 @@ def renderProfile(username, profileName):
 
         profilePosts = []
 
-        for post in posts:
+        try:
+            for post in posts:
 
-            hashtagList = post[5].split(',')
-            newHashtagList = []
+                hashtagList = post[5].split(',')
+                newHashtagList = []
 
-            for hashtag in hashtagList:
-                newHashtagList.append(hashtag[1:])
+                for hashtag in hashtagList:
+                    newHashtagList.append(hashtag[1:])
 
-            try:
-                postComments = post[7].split(',')
-                for commenter in postComments:
-                    if commenter == '':
-                        postComments.remove(commenter)
-            except:
-                postComments = post[7]
-            
-            try:
-                postLikes = post[6].split(',')
-                for liker in postLikes:
-                    if liker == '':
-                        postLikes.remove(liker)
-            except:
-                postLikes = post[6]
-            
-            postdict = {
-                'id': post[0],
-                'date': post[1],
-                'author': post[2],
-                'img-url': post[3],
-                'text': post[4],
-                'likes': postLikes,
-                'comments': postComments,
-                'hashtags': newHashtagList,
-                'authorProfilePicture': profilePicture
-            }
-            profilePosts.append(postdict)
+                try:
+                    postComments = post[7].split(',')
+                    for commenter in postComments:
+                        if commenter == '':
+                            postComments.remove(commenter)
+                except:
+                    postComments = post[7]
+                
+                try:
+                    postLikes = post[6].split(',')
+                    for liker in postLikes:
+                        if liker == '':
+                            postLikes.remove(liker)
+                except:
+                    postLikes = post[6]
+                
+                postdict = {
+                    'id': post[0],
+                    'date': post[1],
+                    'author': post[2],
+                    'img-url': post[3],
+                    'text': post[4],
+                    'likes': postLikes,
+                    'comments': postComments,
+                    'hashtags': newHashtagList,
+                    'authorProfilePicture': profilePicture
+                }
+                profilePosts.append(postdict)
+        except:
+            print("Error loading profile's posts")
+            profilePosts = []
         return render_template('profile.html', username=username, profileName=profileName, posts=profilePosts, isFollowing=isFollowing, bio=bio, profilePicture=profilePicture, numFollowers=numFollowers, numFollowing=numFollowing, userProfilePicture=userProfilePicture, page=f'profile/{profileName}')
 
 @app.route('/failure')
@@ -613,17 +621,60 @@ def likePost(page, username, postID):
     conn.close()
     # object page is a list if the page is a hashtag page, otherwise it is a string
 
-    if page[:7] == 'hashtag':
-        page = page.split(',')
-        page = page[1]
-        return redirect(f'/home/{username}/hashtag/{page}' + '#' + postID)
-    elif page[:7] == 'profile':
-        page = page.split(',')
-        page = page[1]
-        return redirect(f'/home/{username}/profile/{page}' + '#' + postID)
+    return redirect(f'/home/{username}/{page}' + '#' + postID)
+
+#adjusting for hashtag pages
+@app.route('/hashtag/<hashtagName>/<username>/likePost/<postID>')
+def likePostHashtag(hashtagName, username, postID):
+
+    page = f'hashtag/{hashtagName}'
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT likes FROM posts WHERE id = {postID}')
+    currentLikes = cur.fetchone()[0]
+    if currentLikes == None:
+        currentLikes = username
+    elif currentLikes == '':
+        currentLikes = username
+    elif currentLikes.find(username) != -1:
+        #remove like
+        currentLikes = currentLikes.split(',')
+        currentLikes.remove(username)
+        currentLikes = ",".join(currentLikes)
     else:
-        return redirect(f'/home/{username}/{page}' + '#' + postID)
-    
+        currentLikes += f',{username}'
+    cur.execute(f'UPDATE posts SET likes = "{currentLikes}" WHERE id = {postID}')
+    conn.commit()
+    conn.close()
+    # object page is a list if the page is a hashtag page, otherwise it is a string
+
+    return redirect(f'/home/{username}/{page}' + '#' + postID)
+#adjusting for profile pages
+@app.route('/profile/<profileName>/<username>/likePost/<postID>')
+def likePostProfile(profileName, username, postID):
+
+    page = f'profile/{profileName}'
+    conn = sqlite3.connect(DATABASE)
+    cur = conn.cursor()
+    cur.execute(f'SELECT likes FROM posts WHERE id = {postID}')
+    currentLikes = cur.fetchone()[0]
+    if currentLikes == None:
+        currentLikes = username
+    elif currentLikes == '':
+        currentLikes = username
+    elif currentLikes.find(username) != -1:
+        #remove like
+        currentLikes = currentLikes.split(',')
+        currentLikes.remove(username)
+        currentLikes = ",".join(currentLikes)
+    else:
+        currentLikes += f',{username}'
+    cur.execute(f'UPDATE posts SET likes = "{currentLikes}" WHERE id = {postID}')
+    conn.commit()
+    conn.close()
+    # object page is a list if the page is a hashtag page, otherwise it is a string
+
+    return redirect(f'/home/{username}/{page}' + '#' + postID)
 
 @app.route('/<page>/<username>/comments/<postID>')
 def loadComments(page, username, postID):
