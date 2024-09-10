@@ -29,8 +29,9 @@ from which I imported several modules including render_template (to load html fi
 </ul>
 <h2>How to install and run the project on localhost</h2>
 <ol>
-  <li>Install the project to a file</li>
-  <li>Navigate to the file directory in the terminal</li>
+  <li>Install the project to a file (git clone / download)</li>
+  <li>Navigate to the file directory in the terminal (cd <directory-name>)</li>
+  <li> >>pip install flask (if not already installed)
   <li> >>flask run </li>
   <li>Navigate to 'http://127.0.0.1:5000' in the browser to view the application on localhost</li>
 </ol>
