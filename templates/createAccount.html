@@ -29,7 +29,8 @@
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" class="form-control" id="password" name="password" oninput="getPasswordStrength()" required>
+                    <div id="passwordStrength"></div> <!--React component-->
                 </div>
                 <div class="mb-3">
                     <label for="bio" class="form-label">Bio</label>
@@ -39,5 +40,10 @@
             </div>
         </form>
         <script src="/static/JS/newPost.js"></script>
+
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script type="text/babel" src="/static/JS/createAccount.js"></script>
     </body>
 </html>
