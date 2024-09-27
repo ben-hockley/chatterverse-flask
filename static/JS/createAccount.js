@@ -38,11 +38,12 @@ function PasswordStrength() {
     return (
         <>
             <label for="passwordStrengthBar" className="form-label">Password Strength:</label>
-            <progress value={rating} max="6" id="passwordStrengthBar" name="passwordStrengthBar" style={barStyle}></progress>
+            <progress value={rating} max="6" id="passwordStrengthBar" name="passwordStrengthBar" className="progress bg-success" style={barStyle}></progress>
         </>
     )
 }
 
+const passwordBarRoot = ReactDOM.createRoot(document.getElementById('passwordStrength'))
 function getPasswordStrength() {
-    ReactDOM.render(<PasswordStrength/>, document.getElementById('passwordStrength'))
+    passwordBarRoot.render(<PasswordStrength/>)
 }

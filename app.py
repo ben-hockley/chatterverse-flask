@@ -3,10 +3,22 @@ import sqlite3 #sqlite3 database
 import urllib
 import re #regex
 
+
+
 app = Flask(__name__)
 
 DATABASE = 'chatterverse.db'
 
+BOTDETAILS = 'botdetails.db'
+conn = sqlite3.connect(BOTDETAILS)
+cur = conn.cursor()
+cur.execute('SELECT * FROM login')
+botDetails = cur.fetchone()
+conn.close()
+email_address = botDetails[0]
+email_password = botDetails[1]
+
+# Flask routes
 @app.route('/')
 def redirect_login():
     return redirect('/login')
